@@ -16,27 +16,27 @@
         {% if products %}
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
             {% for product in products %}
-            {% if product.slug == "veym-white-shadow" or product.slug == "veym-black-shadow" %}
-    <a href="{{ product.get_absolute_url }}" hx-get="{{ product.get_absolute_url }}" hx-target="#main-content"
-        hx-push-url="true" class="group cursor-pointer flex flex-col items-center">
-        <div class="w-full aspect-[3/4] overflow-hidden mb-4 bg-black relative">
-            {% if product.image %}
-                <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+{% if product.slug == "veym-white-shadow" or product.slug == "veym-black-shadow" %}
+<a href="{{ product.get_absolute_url }}" hx-get="{{ product.get_absolute_url }}" hx-target="#main-content"
+    hx-push-url="true" class="group cursor-pointer flex flex-col items-center">
+    <div class="w-full aspect-[3/4] overflow-hidden mb-4 bg-black relative">
+        {% if product.image %}
+            <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
             {% else %}
-                <div class="w-full h-full flex items-center justify-center text-zinc-600 bg-zinc-950 text-xs font-bold uppercase tracking-widest">VEYM</div>
+                <div class="w-full h-full flex items-center justify-center bg-black"></div>
             {% endif %}
-        </div>
-        <div class="text-center space-y-1">
-            <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wide text-white">
-                {{ product.name }}
-            </h3>
-            <p class="text-xs sm:text-sm text-zinc-400 font-medium">
-                {{ product.price }} ₽
-            </p>
-        </div>
-    </a>
+    </div>
+    <div class="text-center space-y-1">
+        <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wide text-white">
+            {{ product.name }}
+        </h3>
+        <p class="text-xs sm:text-sm text-zinc-400 font-medium">
+            {{ product.price }} ₽
+        </p>
+    </div>
+</a>
 {% endif %}
-            {% endfor %}
+{% endfor %}
         </div>
         {% else %}
         <div class="text-center py-20 text-gray-500">

@@ -65,23 +65,10 @@ def seed_initial_data():
         # Clean extra ProductImages so no secondary images exist
         ProductImage.objects.all().delete()
 
+        # Remove existing products except the two we need
+        Product.objects.exclude(slug__in=['veym-white-shadow', 'veym-black-shadow']).delete()
+
         products_data = [
-            {
-                'name': 'VEYM "SCRAP"',
-                'slug': 'veym-scrap',
-                'price': 2800,
-                'category': cat_tops,
-                'description': detailed_description,
-                'image': 'products/char1.png',
-            },
-            {
-                'name': '"VEYM: ECHO OF CHAOS"',
-                'slug': 'veym-echo-of-chaos',
-                'price': 2800,
-                'category': cat_tops,
-                'description': detailed_description,
-                'image': 'products/char2.png',
-            },
             {
                 'name': '"VEYM: WHITE SHADOW"',
                 'slug': 'veym-white-shadow',

@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.templatetags.static import static
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -27,6 +28,20 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse('catalog:product_detail', kwargs={'slug': self.slug})
+
+    @property
+    def get_image_url(self):
+        if not self.image:
+            return ''
+        img_str = str(self.image)
+        if img_str.startswith('http'):
+            return img_str
+        if img_str.startswith('products/'):
+            return static(img_str)
+        try:
+            return self.image.url
+        except Exception:
+            return static(img_str)
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)

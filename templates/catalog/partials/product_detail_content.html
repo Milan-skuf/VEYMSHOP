@@ -3,9 +3,9 @@
 
         <!-- Image Gallery Section -->
         <div class="relative w-full h-[50vh] lg:h-auto" x-data="{ 
-                currentImage: '{{ product.image.url }}',
+                currentImage: '{{ product.get_image_url }}',
                 images: [
-                    '{{ product.image.url }}',
+                    '{{ product.get_image_url }}',
                     {% for img in product.images.all %}'{{ img.image.url }}'{% if not forloop.last %}, {% endif %}{% endfor %}
                 ],
                 currentIndex: 0,
@@ -56,10 +56,10 @@
             {% if product.images.all %}
             <div
                 class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white/80 dark:bg-black/80 backdrop-blur-sm p-2 rounded">
-                <button @click="currentImage = '{{ product.image.url }}'; currentIndex = 0"
-                    :class="currentImage === '{{ product.image.url }}' ? 'ring-2 ring-black dark:ring-white' : ''"
+                <button @click="currentImage = '{{ product.get_image_url }}'; currentIndex = 0"
+                    :class="currentImage === '{{ product.get_image_url }}' ? 'ring-2 ring-black dark:ring-white' : ''"
                     class="w-16 h-16 overflow-hidden bg-gray-200 dark:bg-gray-800 rounded hover:opacity-80">
-                    <img src="{{ product.image.url }}" alt="Main" class="w-full h-full object-cover">
+                    <img src="{{ product.get_image_url }}" alt="Main" class="w-full h-full object-cover">
                 </button>
                 {% for img in product.images.all %}
                 <button @click="currentImage = '{{ img.image.url }}'; currentIndex = {{ forloop.counter }}"

@@ -20,10 +20,10 @@ def seed_initial_data():
                     if not os.path.exists(dst_file):
                         try:
                             shutil.copy2(src_file, dst_file)
-                        except Exception as e:
-                            print(f"Error copying {file_name}: {e}")
+                        except Exception:
+                            pass
 
-        # Copy video if exists on F: or Desktop or VEYMSHOP_ALL_PHOTOS
+        # Copy video if exists
         video_src_candidates = [
             r"F:\0130.mp4",
             os.path.join(src_dir, "0130.mp4"),
@@ -35,9 +35,8 @@ def seed_initial_data():
                 if not os.path.exists(v_dst):
                     try:
                         shutil.copy2(v_src, v_dst)
-                        print(f"Successfully copied video from {v_src} to {v_dst}")
-                    except Exception as e:
-                        print(f"Error copying video: {e}")
+                    except Exception:
+                        pass
                 break
 
         cat_tshirts, _ = Category.objects.get_or_create(
@@ -63,6 +62,9 @@ def seed_initial_data():
 Качество исполнения:
 • Усиленные плечевые швы для предотвращения деформации при носке."""
 
+        # Clean extra ProductImages so no secondary images exist
+        ProductImage.objects.all().delete()
+
         products_data = [
             {
                 'name': 'VEYM "SCRAP"',
@@ -71,7 +73,6 @@ def seed_initial_data():
                 'category': cat_tops,
                 'description': detailed_description,
                 'image': 'products/char1.png',
-                'tshirt_image': 'products/photo_2026-02-26_00-20-50.jpg',
             },
             {
                 'name': '"VEYM: ECHO OF CHAOS"',
@@ -80,7 +81,6 @@ def seed_initial_data():
                 'category': cat_tops,
                 'description': detailed_description,
                 'image': 'products/char2.png',
-                'tshirt_image': 'products/photo_2026-02-26_00-20-50 (2).jpg',
             },
             {
                 'name': '"VEYM: WHITE SHADOW"',
@@ -89,7 +89,6 @@ def seed_initial_data():
                 'category': cat_tshirts,
                 'description': detailed_description,
                 'image': 'products/char3.png',
-                'tshirt_image': 'products/photo_2026-02-26_00-20-50 (3).jpg',
             },
             {
                 'name': '"VEYM: BLACK SHADOW"',
@@ -98,7 +97,6 @@ def seed_initial_data():
                 'category': cat_tshirts,
                 'description': detailed_description,
                 'image': 'products/char4.png',
-                'tshirt_image': 'products/photo_2026-02-26_00-03-31.jpg',
             },
         ]
 
@@ -117,13 +115,6 @@ def seed_initial_data():
             prod.description = p['description']
             prod.image = p['image']
             prod.save()
-
-            # Add tshirt image as gallery image
-            if os.path.exists(os.path.join(settings.BASE_DIR, 'static', p['tshirt_image'])):
-                ProductImage.objects.get_or_create(
-                    product=prod,
-                    image=p['tshirt_image']
-                )
 
     except Exception as e:
         print(f"Error seeding data: {e}")

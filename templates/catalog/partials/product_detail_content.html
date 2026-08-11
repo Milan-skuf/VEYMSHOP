@@ -3,53 +3,12 @@
 <div class="max-w-7xl mx-auto pb-20">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 min-h-[calc(100vh-64px)]">
 
-        <!-- Image & 3D Interactive View Section -->
-        <div class="relative w-full h-[60vh] lg:h-auto bg-black border-r border-zinc-900" x-data="{ 
-                currentImage: '{{ product.get_image_url }}',
-                is3d: false,
-                images: [
-                    '{{ product.get_image_url }}',
-                    {% for img in product.images.all %}'{% static img.image.name %}'{% if not forloop.last %}, {% endif %}{% endfor %}
-                ]
-             }">
-            <!-- Main Image / 3D Model Container -->
-            <div class="group w-full bg-black h-full overflow-hidden relative flex items-center justify-center">
-                {% if product.image %}
-                <!-- 2D / 3D Interactive Photo Display -->
-                <img :src="currentImage" alt="{{ product.name }}" 
-                     class="w-full h-full object-contain p-4 transition-all duration-300">
-
-                <!-- Interactive 3D Rotation Controls indicator -->
-                <div class="absolute top-4 right-4 bg-zinc-900/80 backdrop-blur-md px-3 py-1.5 border border-zinc-800 text-[10px] font-bold uppercase tracking-widest text-zinc-300 flex items-center gap-1.5 pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                        <path d="M3 3v5h5"/>
-                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-                        <path d="M16 16h5v5"/>
-                    </svg>
-                    <span>3D VIEW</span>
-                </div>
-                {% else %}
-                <div class="w-full h-full flex items-center justify-center text-zinc-600 bg-black text-xs font-bold uppercase tracking-widest">VEYM 3D</div>
-                {% endif %}
-            </div>
-
-            <!-- Thumbnail Switcher (Character vs 3D T-Shirt) -->
-            {% if product.images.all %}
-            <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 bg-zinc-900/90 border border-zinc-800 backdrop-blur-md p-2 rounded-lg z-20">
-                <button @click="currentImage = '{{ product.get_image_url }}'"
-                    :class="currentImage === '{{ product.get_image_url }}' ? 'ring-2 ring-white scale-105' : 'opacity-60 hover:opacity-100'"
-                    class="w-14 h-14 overflow-hidden bg-black rounded transition-all flex flex-col items-center justify-center text-[9px] font-bold uppercase tracking-tighter">
-                    <img src="{{ product.get_image_url }}" alt="Character Model" class="w-full h-full object-cover">
-                </button>
-                {% for img in product.images.all %}
-                <button @click="currentImage = '{% static img.image.name %}'"
-                    :class="currentImage === '{% static img.image.name %}' ? 'ring-2 ring-white scale-105' : 'opacity-60 hover:opacity-100'"
-                    class="w-14 h-14 overflow-hidden bg-black rounded transition-all flex flex-col items-center justify-center text-[9px] font-bold uppercase tracking-tighter">
-                    <img src="{% static img.image.name %}" alt="T-Shirt 3D" class="w-full h-full object-cover">
-                </button>
-                {% endfor %}
-            </div>
+        {% comment %} Simplified static image view {% endcomment %}
+        <div class="relative w-full h-[60vh] lg:h-auto bg-black flex items-center justify-center">
+            {% if product.image %}
+                <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center text-zinc-600 bg-black text-xs font-bold uppercase tracking-widest">VEYM</div>
             {% endif %}
         </div>
 

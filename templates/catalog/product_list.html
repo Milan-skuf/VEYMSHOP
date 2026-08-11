@@ -3,12 +3,12 @@
 
 {% block content %}
 <!-- Video Banner Section (F:\0130.mp4) -->
-<div class="relative w-full h-[50vh] sm:h-[70vh] bg-black overflow-hidden border-b border-zinc-900">
-    <video autoplay loop muted playsinline class="w-full h-full object-cover opacity-85">
+<div class="relative w-full h-[45vh] sm:h-[65vh] bg-black overflow-hidden">
+    <video autoplay loop muted playsinline class="w-full h-full object-cover opacity-90">
         <source src="{% static 'videos/banner.mp4' %}" type="video/mp4">
     </video>
-    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col items-center justify-end pb-12 text-center px-4">
-        <h1 class="text-5xl sm:text-8xl font-black uppercase tracking-tighter text-white font-sans drop-shadow-2xl">
+    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20 flex flex-col items-center justify-end pb-12 text-center px-4">
+        <h1 class="text-6xl sm:text-9xl font-black uppercase tracking-tighter text-white font-sans drop-shadow-2xl">
             VEYM
         </h1>
     </div>
@@ -23,17 +23,16 @@
             <a href="{{ product.get_absolute_url }}" hx-get="{{ product.get_absolute_url }}" hx-target="#main-content"
                 hx-push-url="true" class="group cursor-pointer flex flex-col items-center">
                 <div class="w-full aspect-[3/4] overflow-hidden mb-4 bg-black relative">
-                    <div class="absolute inset-0 bg-black/0 group-hover:bg-white/5 transition-colors duration-300 z-10"></div>
                     {% if product.image %}
                     <img src="{{ product.get_image_url }}" alt="{{ product.name }}"
-                        class="w-full h-full object-cover transform group-hover:scale-105 transition-all duration-700 ease-out">
+                        class="w-full h-full object-cover">
                     {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-zinc-500 bg-zinc-950 text-xs font-bold uppercase tracking-widest">VEYM</div>
+                    <div class="w-full h-full flex items-center justify-center text-zinc-600 bg-zinc-950 text-xs font-bold uppercase tracking-widest">VEYM</div>
                     {% endif %}
                 </div>
 
                 <div class="text-center space-y-1">
-                    <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wide group-hover:underline decoration-1 underline-offset-4 text-white">
+                    <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wide text-white">
                         {{ product.name }}
                     </h3>
                     <p class="text-xs sm:text-sm text-zinc-400 font-medium">
@@ -45,7 +44,7 @@
         </div>
         {% else %}
         <div class="text-center py-20 text-gray-500">
-            <p>No products found in this category.</p>
+            <p>Товары не найдены.</p>
         </div>
         {% endif %}
     </div>

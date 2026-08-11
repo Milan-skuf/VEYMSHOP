@@ -1,0 +1,138 @@
+<div class="max-w-7xl mx-auto pb-20">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 min-h-[calc(100vh-64px)]">
+
+        <!-- Image Gallery Section -->
+        <div class="relative w-full h-[50vh] lg:h-auto" x-data="{ 
+                currentImage: '{{ product.image.url }}',
+                images: [
+                    '{{ product.image.url }}',
+                    {% for img in product.images.all %}'{{ img.image.url }}'{% if not forloop.last %}, {% endif %}{% endfor %}
+                ],
+                currentIndex: 0,
+                next() {
+                    this.currentIndex = (this.currentIndex + 1) % this.images.length;
+                    this.currentImage = this.images[this.currentIndex];
+                },
+                prev() {
+                    this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+                    this.currentImage = this.images[this.currentIndex];
+                }
+             }">
+            <!-- Main Image Display -->
+            <div class="group w-full bg-gray-100 dark:bg-zinc-900 h-full overflow-hidden relative">
+                {% if product.image %}
+                <img :src="currentImage" alt="{{ product.name }}" class="w-full h-full object-cover object-center">
+
+                <!-- Navigation Arrows -->
+                <template x-if="images.length > 1">
+                    <div
+                        class="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <button @click="prev()"
+                            class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors"
+                            type="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="m15 18-6-6 6-6" />
+                            </svg>
+                        </button>
+                        <button @click="next()"
+                            class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors"
+                            type="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="m9 18 6-6-6-6" />
+                            </svg>
+                        </button>
+                    </div>
+                </template>
+                {% else %}
+                <div class="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
+                {% endif %}
+            </div>
+
+            <!-- Thumbnail Gallery -->
+            {% if product.images.all %}
+            <div
+                class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white/80 dark:bg-black/80 backdrop-blur-sm p-2 rounded">
+                <button @click="currentImage = '{{ product.image.url }}'; currentIndex = 0"
+                    :class="currentImage === '{{ product.image.url }}' ? 'ring-2 ring-black dark:ring-white' : ''"
+                    class="w-16 h-16 overflow-hidden bg-gray-200 dark:bg-gray-800 rounded hover:opacity-80">
+                    <img src="{{ product.image.url }}" alt="Main" class="w-full h-full object-cover">
+                </button>
+                {% for img in product.images.all %}
+                <button @click="currentImage = '{{ img.image.url }}'; currentIndex = {{ forloop.counter }}"
+                    :class="currentImage === '{{ img.image.url }}' ? 'ring-2 ring-black dark:ring-white' : ''"
+                    class="w-16 h-16 overflow-hidden bg-gray-200 dark:bg-gray-800 rounded hover:opacity-80">
+                    <img src="{{ img.image.url }}" alt="" class="w-full h-full object-cover">
+                </button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Details Section -->
+        <div class="p-6 lg:p-12 flex flex-col justify-center">
+            <div class="mb-8">
+                <h1 class="text-3xl lg:text-5xl font-black uppercase mb-4 tracking-tight">{{ product.name }}</h1>
+                <div class="flex items-baseline space-x-4 text-xl">
+                    <span class="font-bold">{{ product.price }} ₽</span>
+                </div>
+            </div>
+
+            <!-- Size Selector & Add to Cart -->
+            <div class="mb-6" x-data="{ selectedSize: 'M' }">
+                <h3 class="text-sm font-bold uppercase text-gray-500 mb-3">Select Size</h3>
+                <div class="flex gap-2 mb-6">
+                    <button @click="selectedSize = 'S'"
+                        :class="selectedSize === 'S' ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white' : 'bg-white dark:bg-black text-black dark:text-white border-gray-300 dark:border-gray-700'"
+                        class="w-12 h-12 border-2 font-bold uppercase text-sm hover:border-black dark:hover:border-white transition-colors"
+                        type="button">S</button>
+                    <button @click="selectedSize = 'M'"
+                        :class="selectedSize === 'M' ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white' : 'bg-white dark:bg-black text-black dark:text-white border-gray-300 dark:border-gray-700'"
+                        class="w-12 h-12 border-2 font-bold uppercase text-sm hover:border-black dark:hover:border-white transition-colors"
+                        type="button">M</button>
+                    <button @click="selectedSize = 'L'"
+                        :class="selectedSize === 'L' ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white' : 'bg-white dark:bg-black text-black dark:text-white border-gray-300 dark:border-gray-700'"
+                        class="w-12 h-12 border-2 font-bold uppercase text-sm hover:border-black dark:hover:border-white transition-colors"
+                        type="button">L</button>
+                    <button @click="selectedSize = 'XL'"
+                        :class="selectedSize === 'XL' ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white' : 'bg-white dark:bg-black text-black dark:text-white border-gray-300 dark:border-gray-700'"
+                        class="w-12 h-12 border-2 font-bold uppercase text-sm hover:border-black dark:hover:border-white transition-colors"
+                        type="button">XL</button>
+                </div>
+
+                <!-- Add to Cart Form -->
+                <form hx-post="{% url 'cart:add' product.id %}" hx-target="#toast-container" hx-swap="innerHTML"
+                    class="mt-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="size" :value="selectedSize">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit"
+                        class="w-full py-4 bg-black dark:bg-white text-white dark:text-black font-bold uppercase tracking-widest hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm sm:text-base">
+                        Add to Cart
+                    </button>
+                </form>
+            </div>
+
+            <div class="space-y-8 text-sm leading-relaxed text-gray-700 dark:text-gray-300 mt-8">
+                {% if product.description %}
+                <div>
+                    <h3 class="font-bold text-gray-400 uppercase text-xs mb-2">Description</h3>
+                    <p class="whitespace-pre-line">{{ product.description }}</p>
+                </div>
+                {% endif %}
+
+                <div class="text-xs text-gray-500 mt-8 border-t border-gray-200 dark:border-gray-800 pt-4">
+                    <p>
+                        By placing an order, you confirm that you are familiar with the rules.
+                        This product is made to individual order.
+                    </p>
+                    <div class="mt-4 font-bold uppercase">Shipping</div>
+                    <p>Orders will be shipped within 5-7 business days.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

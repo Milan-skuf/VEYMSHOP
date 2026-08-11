@@ -1,0 +1,242 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ELF1 | CONCEPT STORE{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#000000',
+                            white: '#ffffff',
+                            gray: '#808080',
+                            lightGray: '#f5f5f5',
+                            darkGray: '#1a1a1a',
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 20s linear infinite',
+                    }
+                },
+            },
+        }
+    </script>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-white dark:bg-black text-black dark:text-white transition-colors duration-300 flex flex-col min-h-screen"
+    x-data="{ 
+          cartOpen: false, 
+          authOpen: false, 
+          categoryMenuOpen: false,
+          darkMode: localStorage.getItem('darkMode') === 'true' 
+      }" x-init="
+          if (darkMode) document.documentElement.classList.add('dark');
+          $watch('darkMode', value => { 
+              localStorage.setItem('darkMode', value);
+              if (value) {
+                  document.documentElement.classList.add('dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+              }
+          })
+      ">
+
+    <!-- Header -->
+    <header
+        class="sticky top-0 z-40 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+
+            <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                <button @click="open = !open"
+                    class="text-xs sm:text-sm font-bold tracking-widest hover:text-gray-500 dark:hover:text-gray-400 uppercase transition-colors flex items-center gap-1 focus:outline-none">
+                    Catalog
+                    <svg :class="open ? 'rotate-180' : ''" class="w-2.5 h-2.5 transition-transform duration-200"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <!-- Category Dropdown -->
+                <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                    x-transition:enter-start="opacity-0 transform -translate-y-2"
+                    x-transition:enter-end="opacity-100 transform translate-y-0"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="opacity-100 transform translate-y-0"
+                    x-transition:leave-end="opacity-0 transform -translate-y-2"
+                    class="absolute left-0 mt-2 w-48 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 shadow-xl z-50 py-2"
+                    style="display: none;">
+                    <a href="{% url 'catalog:product_list' %}" hx-get="{% url 'catalog:product_list' %}"
+                        hx-target="#main-content" hx-push-url="true" @click="open = false"
+                        class="block px-4 py-2 text-[10px] font-bold tracking-widest uppercase hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
+                        ALL / ВСЁ
+                    </a>
+                    {% for cat in catalog_categories %}
+                    <a href="{% url 'catalog:product_list' %}?category={{ cat.slug }}"
+                        hx-get="{% url 'catalog:product_list' %}?category={{ cat.slug }}" hx-target="#main-content"
+                        hx-push-url="true" @click="open = false"
+                        class="block px-4 py-2 text-[10px] font-bold tracking-widest uppercase hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
+                        {{ cat.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="absolute left-1/2 transform -translate-x-1/2">
+                <a href="{% url 'catalog:product_list' %}" hx-get="{% url 'catalog:product_list' %}"
+                    hx-target="#main-content" hx-push-url="true"
+                    class="text-2xl font-black tracking-tighter uppercase font-sans">
+                    VEYM
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-4 sm:space-x-6">
+                <!-- Theme Toggle -->
+                <button @click="darkMode = !darkMode" class="p-1 hover:opacity-70 transition-opacity">
+                    <svg x-show="!darkMode" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                    </svg>
+                    <svg x-show="darkMode" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2" />
+                        <path d="M12 20v2" />
+                        <path d="m4.93 4.93 1.41 1.41" />
+                        <path d="m17.66 17.66 1.41 1.41" />
+                        <path d="M2 12h2" />
+                        <path d="M20 12h2" />
+                        <path d="m6.34 17.66-1.41 1.41" />
+                        <path d="m19.07 4.93-1.41 1.41" />
+                    </svg>
+                </button>
+
+                <!-- User (Placeholder) -->
+                <button class="p-1 hover:opacity-70 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </button>
+
+                <!-- Cart Trigger -->
+                <button @click="cartOpen = true" hx-get="{% url 'cart:detail' %}" hx-target="#cart-content"
+                    hx-trigger="click"
+                    class="flex items-center space-x-1 text-xs sm:text-sm font-bold tracking-wider hover:opacity-70 transition-opacity cursor-pointer">
+                    <span class="hidden sm:inline">CART</span>
+                    <span id="cart-counter" class="ml-1">{{ cart_count|default:0 }}</span>
+                    <span class="sm:hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="8" cy="21" r="1" />
+                            <circle cx="19" cy="21" r="1" />
+                            <path
+                                d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow" id="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- HTMX Notification Container (for add to cart toasts) -->
+    <div id="toast-container" hx-swap-oob="true"></div>
+
+    <!-- Footer -->
+    <footer
+        class="bg-gray-100 dark:bg-zinc-900 py-8 text-center text-xs uppercase text-gray-500 dark:text-gray-400 transition-colors duration-300">
+        <p>© 2024 ELF1 CONCEPT. ALL RIGHTS RESERVED.</p>
+        <div class="mt-2 space-x-4">
+            <a href="#" class="hover:text-black dark:hover:text-white">Instagram</a>
+            <a href="#" class="hover:text-black dark:hover:text-white">Telegram</a>
+            <a href="#" class="hover:text-black dark:hover:text-white">Legal</a>
+        </div>
+    </footer>
+
+    <!-- Cart Modal (Alpine + HTMX) -->
+    <div x-show="cartOpen" style="display: none;" class="fixed inset-0 z-50" x-cloak>
+
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" @click="cartOpen = false"></div>
+
+        <!-- Drawer -->
+        <div class="absolute inset-y-0 right-0 w-full sm:w-[450px] bg-white dark:bg-zinc-950 shadow-2xl transform transition-transform duration-300 flex flex-col"
+            x-transition:enter="translate-x-full" x-transition:enter-end="translate-x-0"
+            x-transition:leave="translate-x-0" x-transition:leave-end="translate-x-full">
+
+            <div class="p-6 flex items-center justify-between border-b border-gray-100 dark:border-zinc-800">
+                <h2 class="text-xl font-bold uppercase tracking-wider">Shopping Cart</h2>
+                <button @click="cartOpen = false"
+                    class="p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- HTMX Content Container -->
+            <div id="cart-content" class="flex-grow overflow-y-auto p-6">
+                <!-- Content loaded via HTMX -->
+                <p class="text-center text-gray-500 mt-10">Loading cart...</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ELF1 | CONCEPT STORE</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#000000',
+                            white: '#ffffff',
+                            gray: '#808080',
+                            lightGray: '#f5f5f5',
+                            darkGray: '#1a1a1a',
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 20s linear infinite',
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+
+    <!-- React & Babel (UMD Globals) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body class="bg-white dark:bg-black text-black dark:text-white transition-colors duration-300">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS (Inlined for reliability) ---
+        const ShoppingCart = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
+        );
+        const User = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+        );
+        const Sun = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+        );
+        const Moon = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+        );
+        const Menu = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></svg>
+        );
+        const X = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+        );
+        const Trash2 = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+        );
+        const ArrowRight = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+        );
+        const ChevronLeft = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m15 18-6-6 6-6" /></svg>
+        );
+        const ChevronRight = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 18 6-6-6-6" /></svg>
+        );
+
+        // --- CONSTANTS ---
+        const PRODUCTS = [
+            {
+                id: 1,
+                name: 'ЗОНТ ЭЛЬФ1',
+                price: 4444,
+                oldPrice: 6666,
+                category: 'ACCESSORIES',
+                image: 'https://picsum.photos/seed/umbrella/600/800',
+                images: [
+                    'https://picsum.photos/seed/umbrella/600/800',
+                    'https://picsum.photos/seed/umbrella2/600/800',
+                    'https://picsum.photos/seed/umbrella3/600/800',
+                    'https://picsum.photos/seed/umbrella4/600/800',
+                ],
+                description: [
+                    '100% зонт',
+                    'принт на верхней стороне',
+                    'принт на нижней стороне',
+                    'форменная ручка',
+                    'черный цвет'
+                ],
+                details: [
+                    'бесшовная сборка',
+                    'детализированный принт сигареты',
+                    'две раздвижные секции'
+                ]
+            },
+            {
+                id: 2,
+                name: 'FUTURISTIC CAP',
+                price: 2500,
+                category: 'HEADWEAR',
+                image: 'https://picsum.photos/seed/cap/600/800',
+                description: ['100% Cotton', 'Embroidered Logo']
+            },
+            {
+                id: 3,
+                name: 'MESH TANK TOP',
+                price: 3200,
+                category: 'TOPS',
+                image: 'https://picsum.photos/seed/tanktop/600/800',
+                description: ['Synthetic Mesh', 'Breathable']
+            },
+            {
+                id: 4,
+                name: 'CHAIN DRESS',
+                price: 12000,
+                category: 'DRESSES',
+                image: 'https://picsum.photos/seed/dress/600/800',
+                description: ['Evening wear', 'Metal chains']
+            },
+            {
+                id: 5,
+                name: 'CYBER SHORTS',
+                price: 3500,
+                category: 'BOTTOMS',
+                image: 'https://picsum.photos/seed/shorts/600/800',
+                description: ['Nylon', 'Reflective elements']
+            },
+            {
+                id: 6,
+                name: 'TECHNO JACKET',
+                price: 15000,
+                category: 'OUTERWEAR',
+                image: 'https://picsum.photos/seed/jacket/600/800',
+                description: ['Waterproof', 'Thermal insulation']
+            },
+            {
+                id: 7,
+                name: 'LOGO BEANIE',
+                price: 2000,
+                category: 'HEADWEAR',
+                image: 'https://picsum.photos/seed/beanie/600/800',
+                description: ['Wool blend', 'Knitted']
+            },
+            {
+                id: 8,
+                name: 'OVERSIZED TEE',
+                price: 4000,
+                category: 'TOPS',
+                image: 'https://picsum.photos/seed/tee/600/800',
+                description: ['Heavyweight cotton', 'Screen print']
+            },
+            {
+                id: 9,
+                name: 'LEATHER BAG',
+                price: 8900,
+                category: 'ACCESSORIES',
+                image: 'https://picsum.photos/seed/bag/600/800',
+                description: ['Genuine leather', 'Steel hardware']
+            },
+            {
+                id: 10,
+                name: 'SILVER RING',
+                price: 1500,
+                category: 'JEWELRY',
+                image: 'https://picsum.photos/seed/ring/600/800',
+                description: ['Sterling Silver', 'Adjustable']
+            },
+            {
+                id: 11,
+                name: 'DISTRESSED JEANS',
+                price: 7500,
+                category: 'BOTTOMS',
+                image: 'https://picsum.photos/seed/jeans/600/800',
+                description: ['Denim', 'Hand distressed']
+            },
+            {
+                id: 12,
+                name: 'SCARF PRINT',
+                price: 3000,
+                category: 'ACCESSORIES',
+                image: 'https://picsum.photos/seed/scarf/600/800',
+                description: ['Silk touch', 'Digital print']
+            }
+        ];
+
+        // --- COMPONENTS ---
+
+        // AuthModal.tsx
+        const AuthModal = ({ isOpen, onClose }) => {
+            const [phone, setPhone] = useState('');
+            const [step, setStep] = useState('PHONE');
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        onClick={onClose}
+                    />
+                    <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 shadow-2xl p-8 transform transition-all">
+                        <button
+                            onClick={onClose}
+                            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-black uppercase mb-2">
+                                {step === 'PHONE' ? 'Вход / Регистрация' : 'Код подтверждения'}
+                            </h2>
+                            <p className="text-sm text-gray-500">
+                                {step === 'PHONE'
+                                    ? 'Введите номер телефона для авторизации'
+                                    : `Мы отправили код на номер ${phone}`
+                                }
+                            </p>
+                        </div>
+
+                        <form onSubmit={(e) => { e.preventDefault(); if (step === 'PHONE') setStep('CODE'); else onClose(); }}>
+                            {step === 'PHONE' ? (
+                                <div className="space-y-4">
+                                    <input
+                                        type="tel"
+                                        placeholder="+7 (999) 000-00-00"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        className="w-full p-4 border border-gray-300 dark:border-gray-700 bg-transparent text-lg focus:outline-none focus:border-black dark:focus:border-white transition-colors text-center font-mono"
+                                        required
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex justify-center gap-2">
+                                        {[1, 2, 3, 4].map((_, i) => (
+                                            <input
+                                                key={i}
+                                                type="text"
+                                                maxLength={1}
+                                                className="w-12 h-14 border border-gray-300 dark:border-gray-700 bg-transparent text-2xl text-center focus:outline-none focus:border-black dark:focus:border-white transition-colors"
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                className="w-full mt-8 py-4 bg-black dark:bg-white text-white dark:text-black font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                            >
+                                <span>{step === 'PHONE' ? 'Продолжить' : 'Подтвердить'}</span>
+                                <ArrowRight size={18} />
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Cart.tsx
+        const Cart = ({ isOpen, onClose, items, onRemove }) => {
+            const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+            return (
+                <React.Fragment>
+                    <div
+                        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                        onClick={onClose}
+                    />
+
+                    <div className={`fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white dark:bg-zinc-950 shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+
+                        <div className="p-6 flex items-center justify-between border-b border-gray-100 dark:border-zinc-800">
+                            <h2 className="text-xl font-bold uppercase tracking-wider">Ваш Заказ</h2>
+                            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-full transition-colors">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="flex-grow overflow-y-auto p-6">
+                            {items.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
+                                    <p className="text-lg font-medium text-gray-500">Корзина пуста. Добавьте в корзину хотя бы один товар</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {items.map((item) => (
+                                        <div key={item.id} className="flex gap-4">
+                                            <div className="w-24 h-32 bg-gray-100 flex-shrink-0">
+                                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="flex-grow flex flex-col justify-between py-1">
+                                                <div>
+                                                    <h3 className="font-bold uppercase text-sm mb-1">{item.name}</h3>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Количество: {item.quantity}</p>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-bold">{item.price.toLocaleString('ru-RU')} ₽</span>
+                                                    <button
+                                                        onClick={() => onRemove(item.id)}
+                                                        className="text-red-500 hover:text-red-600 transition-colors"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-6 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900">
+                            <div className="flex justify-between items-center mb-6 text-lg font-bold uppercase">
+                                <span>Итого:</span>
+                                <span>{totalPrice.toLocaleString('ru-RU')} ₽</span>
+                            </div>
+                            <button
+                                disabled={items.length === 0}
+                                className="w-full py-4 bg-gray-500 text-white font-bold uppercase tracking-widest hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Оформить Заказ
+                            </button>
+                        </div>
+                    </div>
+                </React.Fragment>
+            );
+        };
+
+        // Layout.tsx
+        const Layout = ({
+            children,
+            setView,
+            cartCount,
+            openCart,
+            openAuth,
+            toggleTheme,
+            isDarkMode
+        }) => {
+            return (
+                <div className="min-h-screen flex flex-col relative overflow-x-hidden">
+                    <header className="sticky top-0 z-40 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+
+                            <button
+                                onClick={() => setView('CATALOG')}
+                                className="text-xs sm:text-sm font-bold tracking-widest hover:text-gray-500 dark:hover:text-gray-400 uppercase transition-colors"
+                            >
+                                Каталог
+                            </button>
+
+                            <div
+                                onClick={() => setView('HOME')}
+                                className="absolute left-1/2 transform -translate-x-1/2 cursor-pointer"
+                            >
+                                <h1 className="text-2xl font-black tracking-tighter uppercase font-sans">
+                                    ЭЛЬФ<span className="italic font-light">1</span>
+                                </h1>
+                            </div>
+
+                            <div className="flex items-center space-x-4 sm:space-x-6">
+                                <button onClick={toggleTheme} className="p-1 hover:opacity-70 transition-opacity">
+                                    {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                                </button>
+
+                                <button onClick={openAuth} className="p-1 hover:opacity-70 transition-opacity">
+                                    <User size={20} />
+                                </button>
+
+                                <button
+                                    onClick={openCart}
+                                    className="flex items-center space-x-1 text-xs sm:text-sm font-bold tracking-wider hover:opacity-70 transition-opacity"
+                                >
+                                    <span className="hidden sm:inline">КОРЗИНА</span>
+                                    <span className="sm:hidden"><ShoppingCart size={20} /></span>
+                                    <span>{cartCount}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-grow">
+                        {children}
+                    </main>
+
+                    <footer className="bg-gray-100 dark:bg-zinc-900 py-8 text-center text-xs uppercase text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                        <p>© 2024 ELF1 CONCEPT. ALL RIGHTS RESERVED.</p>
+                        <div className="mt-2 space-x-4">
+                            <a href="#" className="hover:text-black dark:hover:text-white">Instagram</a>
+                            <a href="#" className="hover:text-black dark:hover:text-white">Telegram</a>
+                            <a href="#" className="hover:text-black dark:hover:text-white">Legal</a>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        // Home.tsx
+        const Home = ({ onProductClick }) => {
+            const circleProducts = PRODUCTS.slice(0, 12);
+            const radius = 260;
+
+            return (
+                <div className="relative min-h-[calc(100vh-64px)] overflow-hidden flex items-center justify-center bg-white dark:bg-black transition-colors duration-300">
+
+                    <div className="absolute z-10 pointer-events-none">
+                        <svg width="200" height="100" viewBox="0 0 200 100" className="fill-black dark:fill-white transition-colors duration-300">
+                            <path d="M20,50 Q60,10 100,50 T180,50" fill="none" stroke="currentColor" strokeWidth="8" />
+                            <path d="M20,40 Q60,0 100,40 T180,40" fill="none" stroke="currentColor" strokeWidth="6" />
+                            <path d="M20,60 Q60,100 100,60 T180,60" fill="none" stroke="currentColor" strokeWidth="6" />
+                            <circle cx="100" cy="50" r="10" />
+                            <path d="M10,50 L40,50" stroke="currentColor" strokeWidth="4" />
+                        </svg>
+                    </div>
+
+                    <div className="lg:hidden grid grid-cols-2 gap-4 p-4 w-full h-full overflow-y-auto">
+                        {circleProducts.map((product) => (
+                            <div
+                                key={product.id}
+                                onClick={() => onProductClick(product)}
+                                className="flex flex-col items-center justify-center cursor-pointer group"
+                            >
+                                <div className="w-32 h-32 rounded-full overflow-hidden border border-gray-200 dark:border-gray-800 mb-2 group-hover:border-black dark:group-hover:border-white transition-colors">
+                                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                                </div>
+                                <span className="text-xs font-bold uppercase text-center">{product.name}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="hidden lg:flex w-[800px] h-[800px] rounded-full relative items-center justify-center">
+                        {circleProducts.map((product, index) => {
+                            const total = circleProducts.length;
+                            const angle = (360 / total) * index;
+                            const style = {
+                                transform: `rotate(${angle}deg) translate(${radius}px) rotate(-${angle}deg)`,
+                            };
+
+                            return (
+                                <div
+                                    key={product.id}
+                                    style={style}
+                                    onClick={() => onProductClick(product)}
+                                    className="absolute w-32 h-32 flex items-center justify-center cursor-pointer group transition-transform duration-500 ease-out hover:scale-125 z-20"
+                                >
+                                    <div className="w-full h-full rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden shadow-lg group-hover:shadow-xl transition-all">
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
+        // Catalog.tsx
+        const Catalog = ({ onProductClick }) => {
+            return (
+                <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+                    <div className="flex justify-center space-x-6 mb-12 text-xs uppercase font-bold tracking-widest text-gray-500 dark:text-gray-400 overflow-x-auto pb-2">
+                        <span className="text-black dark:text-white border-b-2 border-black dark:border-white cursor-pointer pb-1">All</span>
+                        <span className="hover:text-black dark:hover:text-white cursor-pointer transition-colors pb-1">New</span>
+                        <span className="hover:text-black dark:hover:text-white cursor-pointer transition-colors pb-1">Category</span>
+                        <span className="hover:text-black dark:hover:text-white cursor-pointer transition-colors pb-1">Clothes</span>
+                        <span className="hover:text-black dark:hover:text-white cursor-pointer transition-colors pb-1">Accessories</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-12">
+                        {PRODUCTS.map((product) => (
+                            <div
+                                key={product.id}
+                                onClick={() => onProductClick(product)}
+                                className="group cursor-pointer flex flex-col items-center"
+                            >
+                                <div className="w-full aspect-[3/4] overflow-hidden mb-4 bg-gray-100 dark:bg-gray-900 relative">
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-white/5 transition-colors duration-300 z-10" />
+                                    <img
+                                        src={product.image}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                                    />
+                                </div>
+
+                                <div className="text-center space-y-1">
+                                    <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wide group-hover:underline decoration-1 underline-offset-4">
+                                        {product.name}
+                                    </h3>
+                                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                                        {product.price.toLocaleString('ru-RU')} ₽
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // ProductPage.tsx
+        const ProductPage = ({ product, onAddToCart }) => {
+            const [currentImageIndex, setCurrentImageIndex] = useState(0);
+            const images = product.images && product.images.length > 0 ? product.images : [product.image];
+
+            const nextImage = () => {
+                setCurrentImageIndex((prev) => (prev + 1) % images.length);
+            };
+
+            const prevImage = () => {
+                setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+            };
+
+            return (
+                <div className="max-w-7xl mx-auto pb-20">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 min-h-[calc(100vh-64px)]">
+
+                        <div className="relative group w-full bg-gray-100 dark:bg-zinc-900 h-[50vh] lg:h-auto overflow-hidden">
+                            <img
+                                src={images[currentImageIndex]}
+                                alt={product.name}
+                                className="w-full h-full object-cover object-center"
+                            />
+
+                            {images.length > 1 && (
+                                <React.Fragment>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/30 backdrop-blur rounded-full text-black dark:text-white transition-colors"
+                                    >
+                                        <ChevronLeft size={32} />
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/30 backdrop-blur rounded-full text-black dark:text-white transition-colors"
+                                    >
+                                        <ChevronRight size={32} />
+                                    </button>
+                                </React.Fragment>
+                            )}
+
+                            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                                {images.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`w-12 h-12 border-2 ${currentImageIndex === idx ? 'border-black dark:border-white' : 'border-transparent'} overflow-hidden transition-colors`}
+                                    >
+                                        <img src={img} className="w-full h-full object-cover" alt="" />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="p-6 lg:p-12 flex flex-col justify-center">
+                            <div className="mb-8">
+                                <h1 className="text-3xl lg:text-5xl font-black uppercase mb-4 tracking-tight">{product.name}</h1>
+                                <div className="flex items-baseline space-x-4 text-xl">
+                                    <span className="font-bold">{product.price.toLocaleString('ru-RU')} p.</span>
+                                    {product.oldPrice && (
+                                        <span className="text-gray-400 line-through text-lg">{product.oldPrice.toLocaleString('ru-RU')} p.</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => onAddToCart(product)}
+                                className="w-full py-4 bg-black dark:bg-white text-white dark:text-black font-bold uppercase tracking-widest hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors mb-12 text-sm sm:text-base"
+                            >
+                                Добавить в корзину
+                            </button>
+
+                            <div className="space-y-8 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                                {product.description && (
+                                    <div>
+                                        <h3 className="font-bold text-gray-400 uppercase text-xs mb-2">Описание</h3>
+                                        <ul className="list-disc pl-5 space-y-1">
+                                            {product.description.map((line, i) => <li key={i}>{line}</li>)}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {product.details && (
+                                    <div>
+                                        <h3 className="font-bold text-gray-400 uppercase text-xs mb-2">Детали</h3>
+                                        <ul className="list-disc pl-5 space-y-1">
+                                            {product.details.map((line, i) => <li key={i}>{line}</li>)}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                <div className="text-xs text-gray-500 mt-8 border-t border-gray-200 dark:border-gray-800 pt-4">
+                                    <p>
+                                        Оформляя заказ, вы подтверждаете, что ознакомлены с правилами.
+                                        Данный товар изготавливается по индивидуальному заказу.
+                                    </p>
+                                    <div className="mt-4 font-bold uppercase">Отправка</div>
+                                    <p>Отправка заказов будет осуществляться через 5-7 рабочих дней.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // App.tsx
+        function App() {
+            const [view, setView] = useState('HOME');
+            const [selectedProduct, setSelectedProduct] = useState(null);
+            const [cart, setCart] = useState([]);
+            const [isCartOpen, setIsCartOpen] = useState(false);
+            const [isAuthOpen, setIsAuthOpen] = useState(false);
+            const [theme, setTheme] = useState('light');
+
+            // Handle Theme
+            useEffect(() => {
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }, [theme]);
+
+            const toggleTheme = () => {
+                setTheme(prev => prev === 'light' ? 'dark' : 'light');
+            };
+
+            // Cart Logic
+            const addToCart = (product) => {
+                setCart(prev => {
+                    const existing = prev.find(item => item.id === product.id);
+                    if (existing) {
+                        return prev.map(item =>
+                            item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+                        );
+                    }
+                    return [...prev, { ...product, quantity: 1 }];
+                });
+                setIsCartOpen(true);
+            };
+
+            const removeFromCart = (id) => {
+                setCart(prev => prev.filter(item => item.id !== id));
+            };
+
+            const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+            // Navigation Logic
+            const handleProductClick = (product) => {
+                setSelectedProduct(product);
+                setView('PRODUCT_DETAIL');
+                window.scrollTo(0, 0);
+            };
+
+            const handleSetView = (newView) => {
+                setView(newView);
+                window.scrollTo(0, 0);
+            };
+
+            return (
+                <Layout
+                    setView={handleSetView}
+                    cartCount={cartCount}
+                    openCart={() => setIsCartOpen(true)}
+                    openAuth={() => setIsAuthOpen(true)}
+                    toggleTheme={toggleTheme}
+                    isDarkMode={theme === 'dark'}
+                >
+                    {view === 'HOME' && <Home onProductClick={handleProductClick} />}
+                    {view === 'CATALOG' && <Catalog onProductClick={handleProductClick} />}
+                    {view === 'PRODUCT_DETAIL' && selectedProduct && (
+                        <ProductPage product={selectedProduct} onAddToCart={addToCart} />
+                    )}
+
+                    <Cart
+                        isOpen={isCartOpen}
+                        onClose={() => setIsCartOpen(false)}
+                        items={cart}
+                        onRemove={removeFromCart}
+                    />
+
+                    <AuthModal
+                        isOpen={isAuthOpen}
+                        onClose={() => setIsAuthOpen(false)}
+                    />
+                </Layout>
+            );
+        }
+
+        // Entry
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(
+            <React.StrictMode>
+                <App />
+            </React.StrictMode>
+        );
+    </script>
+</body>
+
+</html>

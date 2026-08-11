@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+
+
+    <!-- Product Grid -->
+    <div id="product-grid-container">
+        {% if products %}
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-12">
+            {% for product in products %}
+            <a href="{{ product.get_absolute_url }}" hx-get="{{ product.get_absolute_url }}" hx-target="#main-content"
+                hx-push-url="true" class="group cursor-pointer flex flex-col items-center">
+                <div class="w-full aspect-[3/4] overflow-hidden mb-4 bg-gray-100 dark:bg-gray-900 relative">
+                    <div
+                        class="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-white/5 transition-colors duration-300 z-10">
+                    </div>
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                        class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">No Image</div>
+                    {% endif %}
+                </div>
+
+                <div class="text-center space-y-1">
+                    <h3
+                        class="text-xs sm:text-sm font-bold uppercase tracking-wide group-hover:underline decoration-1 underline-offset-4">
+                        {{ product.name }}
+                    </h3>
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                        {{ product.price }} ₽
+                    </p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-20 text-gray-500">
+            <p>No products found in this category.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% for cat in categories %}
+<a href="?category={{ cat.slug }}" hx-get="?category={{ cat.slug }}" hx-target="#product-grid-container"
+    hx-push-url="true"
+    class="{% if request.GET.category == cat.slug %}text-black dark:text-white border-b-2 border-black dark:border-white{% else %}hover:text-black dark:hover:text-white{% endif %} cursor-pointer pb-1 transition-colors">
+    {{ cat.name }}
+</a>
+{% endfor %}

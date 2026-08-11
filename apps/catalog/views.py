@@ -1,6 +1,7 @@
 from django.views.generic import ListView, DetailView
 from django.shortcuts import render
 from .models import Product, Category
+from services.seed_data import seed_initial_data
 
 class CatalogListView(ListView):
     model = Product
@@ -16,6 +17,7 @@ class CatalogListView(ListView):
         return render(request, self.template_name, context)
 
     def get_queryset(self):
+        seed_initial_data()
         qs = Product.objects.filter(is_active=True)
         category_slug = self.request.GET.get('category')
         if category_slug:

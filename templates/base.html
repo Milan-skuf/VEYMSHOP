@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" class="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -73,7 +73,7 @@
           cartOpen: false, 
           authOpen: false, 
           categoryMenuOpen: false,
-          darkMode: localStorage.getItem('darkMode') === 'true' 
+          darkMode: localStorage.getItem('darkMode') !== 'false' 
       }" x-init="
           if (darkMode) document.documentElement.classList.add('dark');
           $watch('darkMode', value => { 

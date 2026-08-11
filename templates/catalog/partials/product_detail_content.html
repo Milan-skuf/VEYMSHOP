@@ -1,136 +1,114 @@
+{% load static %}
+
 <div class="max-w-7xl mx-auto pb-20">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 min-h-[calc(100vh-64px)]">
 
-        <!-- Image Gallery Section -->
-        <div class="relative w-full h-[50vh] lg:h-auto" x-data="{ 
+        <!-- Image & 3D Interactive View Section -->
+        <div class="relative w-full h-[60vh] lg:h-auto bg-black border-r border-zinc-900" x-data="{ 
                 currentImage: '{{ product.get_image_url }}',
+                is3d: false,
                 images: [
                     '{{ product.get_image_url }}',
-                    {% for img in product.images.all %}'{{ img.image.url }}'{% if not forloop.last %}, {% endif %}{% endfor %}
-                ],
-                currentIndex: 0,
-                next() {
-                    this.currentIndex = (this.currentIndex + 1) % this.images.length;
-                    this.currentImage = this.images[this.currentIndex];
-                },
-                prev() {
-                    this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-                    this.currentImage = this.images[this.currentIndex];
-                }
+                    {% for img in product.images.all %}'{% static img.image.name %}'{% if not forloop.last %}, {% endif %}{% endfor %}
+                ]
              }">
-            <!-- Main Image Display -->
-            <div class="group w-full bg-gray-100 dark:bg-zinc-900 h-full overflow-hidden relative">
+            <!-- Main Image / 3D Model Container -->
+            <div class="group w-full bg-black h-full overflow-hidden relative flex items-center justify-center">
                 {% if product.image %}
-                <img :src="currentImage" alt="{{ product.name }}" class="w-full h-full object-cover object-center">
+                <!-- 2D / 3D Interactive Photo Display -->
+                <img :src="currentImage" alt="{{ product.name }}" 
+                     class="w-full h-full object-contain p-4 transition-all duration-300">
 
-                <!-- Navigation Arrows -->
-                <template x-if="images.length > 1">
-                    <div
-                        class="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <button @click="prev()"
-                            class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors"
-                            type="button">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="m15 18-6-6 6-6" />
-                            </svg>
-                        </button>
-                        <button @click="next()"
-                            class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors"
-                            type="button">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="m9 18 6-6-6-6" />
-                            </svg>
-                        </button>
-                    </div>
-                </template>
+                <!-- Interactive 3D Rotation Controls indicator -->
+                <div class="absolute top-4 right-4 bg-zinc-900/80 backdrop-blur-md px-3 py-1.5 border border-zinc-800 text-[10px] font-bold uppercase tracking-widest text-zinc-300 flex items-center gap-1.5 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                        <path d="M16 16h5v5"/>
+                    </svg>
+                    <span>3D VIEW</span>
+                </div>
                 {% else %}
-                <div class="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
+                <div class="w-full h-full flex items-center justify-center text-zinc-600 bg-black text-xs font-bold uppercase tracking-widest">VEYM 3D</div>
                 {% endif %}
             </div>
 
-            <!-- Thumbnail Gallery -->
+            <!-- Thumbnail Switcher (Character vs 3D T-Shirt) -->
             {% if product.images.all %}
-            <div
-                class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white/80 dark:bg-black/80 backdrop-blur-sm p-2 rounded">
-                <button @click="currentImage = '{{ product.get_image_url }}'; currentIndex = 0"
-                    :class="currentImage === '{{ product.get_image_url }}' ? 'ring-2 ring-black dark:ring-white' : ''"
-                    class="w-16 h-16 overflow-hidden bg-gray-200 dark:bg-gray-800 rounded hover:opacity-80">
-                    <img src="{{ product.get_image_url }}" alt="Main" class="w-full h-full object-cover">
+            <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 bg-zinc-900/90 border border-zinc-800 backdrop-blur-md p-2 rounded-lg z-20">
+                <button @click="currentImage = '{{ product.get_image_url }}'"
+                    :class="currentImage === '{{ product.get_image_url }}' ? 'ring-2 ring-white scale-105' : 'opacity-60 hover:opacity-100'"
+                    class="w-14 h-14 overflow-hidden bg-black rounded transition-all flex flex-col items-center justify-center text-[9px] font-bold uppercase tracking-tighter">
+                    <img src="{{ product.get_image_url }}" alt="Character Model" class="w-full h-full object-cover">
                 </button>
                 {% for img in product.images.all %}
-                <button @click="currentImage = '{{ img.image.url }}'; currentIndex = {{ forloop.counter }}"
-                    :class="currentImage === '{{ img.image.url }}' ? 'ring-2 ring-black dark:ring-white' : ''"
-                    class="w-16 h-16 overflow-hidden bg-gray-200 dark:bg-gray-800 rounded hover:opacity-80">
-                    <img src="{{ img.image.url }}" alt="" class="w-full h-full object-cover">
+                <button @click="currentImage = '{% static img.image.name %}'"
+                    :class="currentImage === '{% static img.image.name %}' ? 'ring-2 ring-white scale-105' : 'opacity-60 hover:opacity-100'"
+                    class="w-14 h-14 overflow-hidden bg-black rounded transition-all flex flex-col items-center justify-center text-[9px] font-bold uppercase tracking-tighter">
+                    <img src="{% static img.image.name %}" alt="T-Shirt 3D" class="w-full h-full object-cover">
                 </button>
                 {% endfor %}
             </div>
             {% endif %}
         </div>
 
-        <!-- Details Section -->
-        <div class="p-6 lg:p-12 flex flex-col justify-center">
-            <div class="mb-8">
-                <h1 class="text-3xl lg:text-5xl font-black uppercase mb-4 tracking-tight">{{ product.name }}</h1>
-                <div class="flex items-baseline space-x-4 text-xl">
-                    <span class="font-bold">{{ product.price }} ₽</span>
+        <!-- Details Section (Matching Screenshot 1) -->
+        <div class="p-6 lg:p-12 flex flex-col justify-center bg-black text-white">
+            <div class="mb-6">
+                <h1 class="text-3xl lg:text-5xl font-black uppercase mb-3 tracking-tight font-sans text-white">{{ product.name }}</h1>
+                <div class="flex items-baseline space-x-4 text-2xl font-bold text-white">
+                    <span>{{ product.price }} ₽</span>
                 </div>
             </div>
 
             <!-- Size Selector & Add to Cart -->
-            <div class="mb-6" x-data="{ selectedSize: 'M' }">
-                <h3 class="text-sm font-bold uppercase text-gray-500 mb-3">Select Size</h3>
+            <div class="mb-8" x-data="{ selectedSize: 'M' }">
+                <h3 class="text-xs font-bold uppercase text-zinc-400 mb-3 tracking-widest">Select Size</h3>
                 <div class="flex gap-2 mb-6">
                     <button @click="selectedSize = 'S'"
-                        :class="selectedSize === 'S' ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white' : 'bg-white dark:bg-black text-black dark:text-white border-gray-300 dark:border-gray-700'"
-                        class="w-12 h-12 border-2 font-bold uppercase text-sm hover:border-black dark:hover:border-white transition-colors"
+                        :class="selectedSize === 'S' ? 'bg-white text-black border-white' : 'bg-black text-white border-zinc-700 hover:border-white'"
+                        class="w-12 h-12 border font-bold uppercase text-sm transition-colors flex items-center justify-center"
                         type="button">S</button>
                     <button @click="selectedSize = 'M'"
-                        :class="selectedSize === 'M' ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white' : 'bg-white dark:bg-black text-black dark:text-white border-gray-300 dark:border-gray-700'"
-                        class="w-12 h-12 border-2 font-bold uppercase text-sm hover:border-black dark:hover:border-white transition-colors"
+                        :class="selectedSize === 'M' ? 'bg-white text-black border-white' : 'bg-black text-white border-zinc-700 hover:border-white'"
+                        class="w-12 h-12 border font-bold uppercase text-sm transition-colors flex items-center justify-center"
                         type="button">M</button>
                     <button @click="selectedSize = 'L'"
-                        :class="selectedSize === 'L' ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white' : 'bg-white dark:bg-black text-black dark:text-white border-gray-300 dark:border-gray-700'"
-                        class="w-12 h-12 border-2 font-bold uppercase text-sm hover:border-black dark:hover:border-white transition-colors"
+                        :class="selectedSize === 'L' ? 'bg-white text-black border-white' : 'bg-black text-white border-zinc-700 hover:border-white'"
+                        class="w-12 h-12 border font-bold uppercase text-sm transition-colors flex items-center justify-center"
                         type="button">L</button>
                     <button @click="selectedSize = 'XL'"
-                        :class="selectedSize === 'XL' ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white' : 'bg-white dark:bg-black text-black dark:text-white border-gray-300 dark:border-gray-700'"
-                        class="w-12 h-12 border-2 font-bold uppercase text-sm hover:border-black dark:hover:border-white transition-colors"
+                        :class="selectedSize === 'XL' ? 'bg-white text-black border-white' : 'bg-black text-white border-zinc-700 hover:border-white'"
+                        class="w-12 h-12 border font-bold uppercase text-sm transition-colors flex items-center justify-center"
                         type="button">XL</button>
                 </div>
 
                 <!-- Add to Cart Form -->
-                <form hx-post="{% url 'cart:add' product.id %}" hx-target="#toast-container" hx-swap="innerHTML"
-                    class="mt-2">
+                <form hx-post="{% url 'cart:add' product.id %}" hx-target="#toast-container" hx-swap="innerHTML">
                     {% csrf_token %}
                     <input type="hidden" name="size" :value="selectedSize">
                     <input type="hidden" name="quantity" value="1">
                     <button type="submit"
-                        class="w-full py-4 bg-black dark:bg-white text-white dark:text-black font-bold uppercase tracking-widest hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm sm:text-base">
+                        class="w-full py-4 bg-white text-black font-bold uppercase tracking-widest hover:bg-zinc-200 transition-colors text-sm sm:text-base border border-white">
                         Add to Cart
                     </button>
                 </form>
             </div>
 
-            <div class="space-y-8 text-sm leading-relaxed text-gray-700 dark:text-gray-300 mt-8">
+            <!-- Detailed Description Block (Exact match to Screenshot 1) -->
+            <div class="space-y-6 text-xs sm:text-sm leading-relaxed text-zinc-300 border-t border-zinc-900 pt-6">
                 {% if product.description %}
                 <div>
-                    <h3 class="font-bold text-gray-400 uppercase text-xs mb-2">Description</h3>
-                    <p class="whitespace-pre-line">{{ product.description }}</p>
+                    <h3 class="font-bold text-zinc-400 uppercase text-xs mb-3 tracking-widest">Description</h3>
+                    <div class="whitespace-pre-line text-zinc-300 font-sans leading-relaxed">{{ product.description }}</div>
                 </div>
                 {% endif %}
 
-                <div class="text-xs text-gray-500 mt-8 border-t border-gray-200 dark:border-gray-800 pt-4">
-                    <p>
-                        By placing an order, you confirm that you are familiar with the rules.
-                        This product is made to individual order.
-                    </p>
-                    <div class="mt-4 font-bold uppercase">Shipping</div>
-                    <p>Orders will be shipped within 5-7 business days.</p>
+                <div class="text-xs text-zinc-500 border-t border-zinc-900 pt-4 space-y-2">
+                    <p>Оставляя заказ, вы подтверждаете согласие с условиями покупки.</p>
+                    <p class="font-bold text-zinc-400 uppercase tracking-widest pt-2">Доставка</p>
+                    <p>Отправка заказов в течение 3–5 рабочих дней (обычно быстрее).</p>
                 </div>
             </div>
         </div>

@@ -1,34 +1,49 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+<!-- Video Banner Section (F:\0130.mp4) -->
+<div class="relative w-full h-[50vh] sm:h-[70vh] bg-black overflow-hidden border-b border-zinc-900">
+    <video autoplay loop muted playsinline class="w-full h-full object-cover opacity-85">
+        <source src="{% static 'videos/banner.mp4' %}" type="video/mp4">
+    </video>
+    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col items-center justify-end pb-10 text-center px-4">
+        <h1 class="text-5xl sm:text-8xl font-black uppercase tracking-tighter text-white font-sans drop-shadow-2xl">
+            VEYM
+        </h1>
+        <p class="mt-2 text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-zinc-400">
+            DIGITAL CONCEPT STORE & 3D CLOTHING
+        </p>
+    </div>
+</div>
 
-
+<div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
     <!-- Product Grid -->
     <div id="product-grid-container">
         {% if products %}
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-12">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
             {% for product in products %}
             <a href="{{ product.get_absolute_url }}" hx-get="{{ product.get_absolute_url }}" hx-target="#main-content"
                 hx-push-url="true" class="group cursor-pointer flex flex-col items-center">
-                <div class="w-full aspect-[3/4] overflow-hidden mb-4 bg-gray-100 dark:bg-gray-900 relative">
-                    <div
-                        class="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-white/5 transition-colors duration-300 z-10">
-                    </div>
+                <div class="w-full aspect-[3/4] overflow-hidden mb-4 bg-black relative border border-zinc-900 group-hover:border-zinc-700 transition-colors">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-white/5 transition-colors duration-300 z-10"></div>
                     {% if product.image %}
                     <img src="{{ product.get_image_url }}" alt="{{ product.name }}"
-                        class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out">
+                        class="w-full h-full object-cover transform group-hover:scale-105 transition-all duration-700 ease-out {% if product.images.first %}group-hover:opacity-0{% endif %}">
+                    {% if product.images.first %}
+                    <img src="{% static product.images.first.image.name %}" alt="{{ product.name }}"
+                        class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transform group-hover:scale-105 transition-all duration-500 ease-out">
+                    {% endif %}
                     {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-zinc-500 bg-zinc-900 text-xs font-bold uppercase tracking-widest">VEYM</div>
+                    <div class="w-full h-full flex items-center justify-center text-zinc-500 bg-zinc-950 text-xs font-bold uppercase tracking-widest">VEYM</div>
                     {% endif %}
                 </div>
 
                 <div class="text-center space-y-1">
-                    <h3
-                        class="text-xs sm:text-sm font-bold uppercase tracking-wide group-hover:underline decoration-1 underline-offset-4">
+                    <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wide group-hover:underline decoration-1 underline-offset-4 text-white">
                         {{ product.name }}
                     </h3>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                    <p class="text-xs sm:text-sm text-zinc-400 font-medium">
                         {{ product.price }} ₽
                     </p>
                 </div>

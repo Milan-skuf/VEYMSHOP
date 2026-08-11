@@ -1,0 +1,34 @@
+{% comment %} Clean product grid partial without banner {% endcomment %}
+<div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <!-- Product Grid -->
+    <div id="product-grid-container">
+        {% if products %}
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+            {% for product in products %}
+            {% if product.slug == "veym-white-shadow" or product.slug == "veym-black-shadow" %}
+            <a href="{{ product.get_absolute_url }}" hx-get="{{ product.get_absolute_url }}" hx-target="#main-content"
+               hx-push-url="true" class="group cursor-pointer flex flex-col items-center">
+                <div class="w-full aspect-[3/4] overflow-hidden mb-4 bg-black relative">
+                    {% if product.image %}
+                        <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-black"></div>
+                    {% endif %}
+                </div>
+                <div class="text-center space-y-1">
+                    <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wide text-white">
+                        {{ product.name }}
+                    </h3>
+                    <p class="text-xs sm:text-sm text-zinc-400 font-medium">
+                        {{ product.price }} ₽
+                    </p>
+                </div>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-20 text-gray-500"><p>Товары не найдены.</p></div>
+        {% endif %}
+    </div>
+</div>

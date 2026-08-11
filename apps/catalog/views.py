@@ -13,7 +13,7 @@ class CatalogListView(ListView):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         if request.headers.get('HX-Request'):
-            return render(request, 'catalog/partials/product_list_content.html', context)
+            return render(request, 'catalog/partials/product_grid.html', context)
         return render(request, self.template_name, context)
 
     def get_queryset(self):
